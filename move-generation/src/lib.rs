@@ -1,7 +1,8 @@
 use pyo3::prelude::*;
-use pyo3::types::PyList;
+use pyo3::types::{PyList, PyTuple};
 use crate::types::{Board, Piece, Color};
-use crate::move_gen::generate_moves;
+use crate::move_gen::{generate_moves, generate_piece_moves};
+use rayon::prelude::*;
 
 /// PyO3 Python API
 #[pyclass]
@@ -42,6 +43,39 @@ impl PyBoard {
             .collect();
         PyList::new(py, moves_uci).into()
     }
+
+    pub fn generate_moves_for_pieces_parallel(&self, py: Python<'_>, piece_sq_list: &PyList) -> PyObject {
+        // Convert Python list of (piece: str, square: int) to Rust Vec<(Piece, u8)>
+        let mut native_vec = Vec::with_capacity(piece_sq_list.len());
+        for item in piece_sq_list.iter() {
+            let tuple = item.downcast::<PyTuple>().unwrap();
+            let piece_str: String = tuple.get_item(0).unwrap().extract().unwrap();
+            let sq: u8 = tuple.get_item(1).unwrap().extract().unwrap();
+            let piece = match piece_str.to_lowercase().as_str() {
+                "pawn" => Piece::Pawn,
+                "knight" => Piece::Knight,
+                "bishop" => Piece::Bishop,
+                "rook" => Piece::Rook,
+                "queen" => Piece::Queen,
+                "king" => Piece::King,
+                _ => Piece::Pawn, // fallback
+            };
+            native_vec.push((piece, sq));
+        }
+        // Now parallelize over the Rust Vec
+        let results: Vec<Vec<String>> = native_vec
+            .par_iter()
+            .map(|(piece, sq)| {
+                let moves = generate_piece_moves(&self.board, *piece, *sq);
+                moves.iter().map(|m| {
+                    let file = |idx| (b'a' + (idx % 8) as u8) as char;
+                    let rank = |idx| (b'1' + (idx / 8) as u8) as char;
+                    format!("{}{}{}{}", file(m.from), rank(m.from), file(m.to), rank(m.to))
+                }).collect::<Vec<_>>()
+            })
+            .collect();
+        PyList::new(py, results).into()
+    }
 }
 
 #[pymodule]
@@ -57,7 +91,7 @@ pub mod rules;
 pub mod types;
 
 use crate::types::Move;
-use crate::move_gen::generate_piece_moves;
+// use crate::move_gen::generate_piece_moves; (removed duplicate)
 use crate::rules::{is_legal_move, validate_board};
 
 pub fn legal_moves(board: &Board, color: Color) -> Vec<Move> {
