@@ -1,6 +1,7 @@
 //! Move generation for fast chess library
 
 use crate::types::{Board, Color, Move, Piece};
+use std::ops::BitOr;
 
 /// Bitboard representation for fast move generation
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -37,6 +38,19 @@ impl Bitboard {
             bb &= bb - 1; // Clear the least significant bit
         }
         bits
+    }
+
+    /// Check if the bitboard contains a specific square
+    pub fn contains(&self, sq: u8) -> bool {
+        self.0 & (1 << sq) != 0
+    }
+}
+
+impl BitOr for Bitboard {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Bitboard(self.0 | rhs.0)
     }
 }
 
@@ -154,10 +168,11 @@ pub fn generate_piece_moves(board: &Board, piece: Piece, sq: u8) -> Vec<Move> {
 fn generate_pawn_moves(board: &Board, sq: u8) -> Vec<Move> {
     let mut moves = vec![];
     let direction = match board.side_to_move {
-        Color::White => -8,
-        Color::Black => 8,
+        Color::White => 8,  // White pawns move up the board
+        Color::Black => -8, // Black pawns move down the board
     };
 
+    // Single forward move
     let forward_sq = sq as i8 + direction;
     if forward_sq >= 0 && forward_sq < 64 && board.squares[forward_sq as usize].is_none() {
         moves.push(Move {
@@ -166,10 +181,10 @@ fn generate_pawn_moves(board: &Board, sq: u8) -> Vec<Move> {
             promotion: None,
         });
 
-        // Double move for pawns on their starting rank
+        // Double forward move (only from starting rank)
         let starting_rank = match board.side_to_move {
-            Color::White => 6,
-            Color::Black => 1,
+            Color::White => 1,
+            Color::Black => 6,
         };
         if sq / 8 == starting_rank {
             let double_forward_sq = forward_sq + direction;
@@ -185,8 +200,8 @@ fn generate_pawn_moves(board: &Board, sq: u8) -> Vec<Move> {
 
     // Captures
     let capture_directions = match board.side_to_move {
-        Color::White => [-9, -7],
-        Color::Black => [7, 9],
+        Color::White => [7, 9],  // Diagonal captures for white
+        Color::Black => [-7, -9], // Diagonal captures for black
     };
     for &cap_dir in &capture_directions {
         let capture_sq = sq as i8 + cap_dir;
@@ -203,7 +218,31 @@ fn generate_pawn_moves(board: &Board, sq: u8) -> Vec<Move> {
         }
     }
 
+    // En Passant
+    if let Some(en_passant_sq) = get_en_passant_square(board) {
+        let en_passant_directions = match board.side_to_move {
+            Color::White => [7, 9],
+            Color::Black => [-7, -9],
+        };
+        for &ep_dir in &en_passant_directions {
+            let target_sq = sq as i8 + ep_dir;
+            if target_sq == en_passant_sq as i8 {
+                moves.push(Move {
+                    from: sq,
+                    to: en_passant_sq,
+                    promotion: None,
+                });
+            }
+        }
+    }
+
     moves
+}
+
+/// Get the en passant square, if available
+fn get_en_passant_square(_board: &Board) -> Option<u8> {
+    // TODO: Implement tracking of en passant square in the board state
+    None
 }
 
 /// Generate knight moves
@@ -259,7 +298,167 @@ fn generate_king_moves(board: &Board, sq: u8) -> Vec<Move> {
         }
     }
 
+    // Castling
+    if can_castle_kingside(board) {
+        moves.push(Move {
+            from: sq,
+            to: sq + 2, // Kingside castling
+            promotion: None,
+        });
+    }
+    if can_castle_queenside(board) {
+        moves.push(Move {
+            from: sq,
+            to: sq - 2, // Queenside castling
+            promotion: None,
+        });
+    }
+
     moves
+}
+
+/// Check if kingside castling is possible
+fn can_castle_kingside(board: &Board) -> bool {
+    let king_sq = match board.side_to_move {
+        Color::White => 4, // e1
+        Color::Black => 60, // e8
+    };
+    let rook_sq = match board.side_to_move {
+        Color::White => 7, // h1
+        Color::Black => 63, // h8
+    };
+
+    // Ensure the king and rook have not moved
+    if !has_king_and_rook_not_moved(board, king_sq, rook_sq) {
+        return false;
+    }
+
+    // Ensure the squares between the king and rook are empty
+    let between_squares = match board.side_to_move {
+        Color::White => [5, 6], // f1, g1
+        Color::Black => [61, 62], // f8, g8
+    };
+    if !are_squares_empty(board, &between_squares) {
+        return false;
+    }
+
+    // Ensure the king does not move through or into check
+    let king_path = match board.side_to_move {
+        Color::White => [4, 5, 6], // e1, f1, g1
+        Color::Black => [60, 61, 62], // e8, f8, g8
+    };
+    if is_any_square_attacked(board, &king_path, board.side_to_move) {
+        return false;
+    }
+
+    true
+}
+
+/// Check if queenside castling is possible
+fn can_castle_queenside(board: &Board) -> bool {
+    let king_sq = match board.side_to_move {
+        Color::White => 4, // e1
+        Color::Black => 60, // e8
+    };
+    let rook_sq = match board.side_to_move {
+        Color::White => 0, // a1
+        Color::Black => 56, // a8
+    };
+
+    // Ensure the king and rook have not moved
+    if !has_king_and_rook_not_moved(board, king_sq, rook_sq) {
+        return false;
+    }
+
+    // Ensure the squares between the king and rook are empty
+    let between_squares = match board.side_to_move {
+        Color::White => [1, 2, 3], // b1, c1, d1
+        Color::Black => [57, 58, 59], // b8, c8, d8
+    };
+    if !are_squares_empty(board, &between_squares) {
+        return false;
+    }
+
+    // Ensure the king does not move through or into check
+    let king_path = match board.side_to_move {
+        Color::White => [4, 3, 2], // e1, d1, c1
+        Color::Black => [60, 59, 58], // e8, d8, c8
+    };
+    if is_any_square_attacked(board, &king_path, board.side_to_move) {
+        return false;
+    }
+
+    true
+}
+
+/// Check if the king and rook have not moved
+fn has_king_and_rook_not_moved(_board: &Board, _king_sq: u8, _rook_sq: u8) -> bool {
+    // TODO: Implement tracking of king and rook movement
+    true
+}
+
+/// Check if all squares in a given list are empty
+fn are_squares_empty(board: &Board, squares: &[u8]) -> bool {
+    squares.iter().all(|&sq| board.squares[sq as usize].is_none())
+}
+
+/// Check if any square in a given list is attacked
+fn is_any_square_attacked(board: &Board, squares: &[u8], color: Color) -> bool {
+    squares.iter().any(|&sq| is_square_attacked(board, sq, color))
+}
+
+/// Check if a square is attacked by the opponent
+fn is_square_attacked(board: &Board, sq: u8, color: Color) -> bool {
+    for (i, piece) in board.squares.iter().enumerate() {
+        if let Some((p, c)) = piece {
+            if *c != color {
+                match p {
+                    Piece::Pawn => {
+                        let attack_offsets = match c {
+                            Color::White => [-7, -9],
+                            Color::Black => [7, 9],
+                        };
+                        for &offset in &attack_offsets {
+                            let target_sq = i as i8 + offset;
+                            if target_sq >= 0 && target_sq < 64 && target_sq as u8 == sq {
+                                return true;
+                            }
+                        }
+                    }
+                    Piece::Knight => {
+                        let knight_offsets = [-17, -15, -10, -6, 6, 10, 15, 17];
+                        for &offset in &knight_offsets {
+                            let target_sq = i as i8 + offset;
+                            if target_sq >= 0 && target_sq < 64 && target_sq as u8 == sq {
+                                return true;
+                            }
+                        }
+                    }
+                    Piece::Bishop | Piece::Rook | Piece::Queen => {
+                        let attacks = match p {
+                            Piece::Bishop => compute_bishop_attacks(i as u8),
+                            Piece::Rook => compute_rook_attacks(i as u8),
+                            Piece::Queen => compute_bishop_attacks(i as u8) | compute_rook_attacks(i as u8),
+                            _ => unreachable!(),
+                        };
+                        if attacks.contains(sq) {
+                            return true;
+                        }
+                    }
+                    Piece::King => {
+                        let king_offsets = [-9, -8, -7, -1, 1, 7, 8, 9];
+                        for &offset in &king_offsets {
+                            let target_sq = i as i8 + offset;
+                            if target_sq >= 0 && target_sq < 64 && target_sq as u8 == sq {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    false
 }
 
 /// Generate bishop moves

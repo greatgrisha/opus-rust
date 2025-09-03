@@ -13,6 +13,9 @@ fn test_pawn_moves() {
 
     let moves = generate_moves(&board, Color::White);
 
+    // Debugging output
+    println!("Generated moves: {:?}", moves);
+
     // Expect the pawn to move to e3 (20) and e4 (28)
     let expected_moves = vec![
         (12, 20),
@@ -20,7 +23,7 @@ fn test_pawn_moves() {
     ];
 
     for &(from, to) in &expected_moves {
-        assert!(moves.iter().any(|m| m.from == from && m.to == to));
+        assert!(moves.iter().any(|m| m.from == from && m.to == to), "Missing move: {} -> {}", from, to);
     }
 }
 
