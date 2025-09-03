@@ -1,0 +1,62 @@
+[
+  {
+    "pieces": [
+      [
+        "rook",
+        "white",
+        0
+      ],
+      [
+        "king",
+        "white",
+        4
+      ],
+      [
+        "rook",
+        "white",
+        7
+      ],
+      [
+        "rook",
+        "black",
+        56
+      ],
+      [
+        "king",
+        "black",
+        60
+      ],
+      [
+        "rook",
+        "black",
+        63
+      ]
+    ],
+    "side_to_move": "white"
+  },
+  {
+    "pieces": [
+      [
+        "queen",
+        "white",
+        0
+      ],
+      [
+        "king",
+        "white",
+        4
+      ],
+      [
+        "bishop",
+        "black",
+        63
+      ],
+      [
+        "king",
+        "black",
+        60
+      ]
+    ],
+    "side_to_move": "black"
+  }
+]

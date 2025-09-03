@@ -28,5 +28,8 @@ pub struct Board {
     // 0..63 squares, None if empty, Some((Piece, Color)) if occupied
     pub squares: [Option<(Piece, Color)>; 64],
     pub side_to_move: Color,
-    // Add castling rights, en passant, etc. as needed
+    pub castling_rights: String, // e.g. "KQkq"
+    pub en_passant: Option<u8>,  // Square index or None
+    pub halfmove_clock: u32,
+    pub fullmove_number: u32,
 }
