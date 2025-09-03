@@ -12,7 +12,7 @@ This project provides an extremely fast chess move generation and rules engine w
 - Full legal move generation for all pieces
 - Parallel move generation for multiple pieces
 - Fast bitboard-based implementation
-- Python API for easy use in data science, AI, and chess tools
+- Python API for easy use in, AI, and chess tools, and especially AI, training
 
 ## Installation
 1. **Build the Python extension:**
