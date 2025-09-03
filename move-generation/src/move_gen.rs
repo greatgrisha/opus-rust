@@ -490,25 +490,41 @@ fn generate_bishop_moves(board: &Board, sq: u8) -> Vec<Move> {
 /// Generate rook moves
 fn generate_rook_moves(board: &Board, sq: u8) -> Vec<Move> {
     let mut moves = vec![];
-    let attacks = compute_rook_attacks(sq);
+    let directions = [-8, -1, 1, 8];
+    let from_rank = sq / 8;
+    let from_file = sq % 8;
 
-    for target_sq in attacks.bits() {
-        if let Some((_, color)) = board.squares[target_sq as usize] {
-            if color != board.side_to_move {
+    for &dir in &directions {
+        let mut current_sq = sq as i8;
+        loop {
+            let next_sq = current_sq + dir;
+            if next_sq < 0 || next_sq >= 64 {
+                break;
+            }
+            let to_rank = (next_sq / 8) as u8;
+            let to_file = (next_sq % 8) as u8;
+            // Prevent wrapping around the board
+            if dir == -1 && to_file > from_file { break; }
+            if dir == 1 && to_file < from_file { break; }
+
+            if let Some((_, color)) = board.squares[next_sq as usize] {
+                if color != board.side_to_move {
+                    moves.push(Move {
+                        from: sq,
+                        to: next_sq as u8,
+                        promotion: None,
+                    });
+                }
+                break; // Blocked by any piece
+            } else {
                 moves.push(Move {
                     from: sq,
-                    to: target_sq,
+                    to: next_sq as u8,
                     promotion: None,
                 });
             }
-        } else {
-            moves.push(Move {
-                from: sq,
-                to: target_sq,
-                promotion: None,
-            });
+            current_sq = next_sq;
         }
     }
-
     moves
 }
