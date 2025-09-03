@@ -45,7 +45,6 @@ impl Bitboard {
         self.0 & (1 << sq) != 0
     }
 }
-
 impl BitOr for Bitboard {
     type Output = Self;
 
@@ -153,16 +152,16 @@ pub fn generate_moves(board: &Board, color: Color) -> Vec<Move> {
 }
 
 /// Generate all valid moves for a specific piece at a square
-pub fn generate_piece_moves(board: &Board, piece: Piece, sq: u8) -> Vec<Move> {
-    match piece {
-        Piece::Pawn => generate_pawn_moves(board, sq),
-        Piece::Knight => generate_knight_moves(sq),
-        Piece::Bishop => generate_bishop_moves(board, sq),
-        Piece::Rook => generate_rook_moves(board, sq),
-        Piece::Queen => generate_queen_moves(board, sq),
-        Piece::King => generate_king_moves(board, sq),
-    }
-}
+// pub fn generate_piece_moves(board: &Board, piece: Piece, sq: u8) -> Vec<Move> {
+//     match piece {
+//         Piece::Pawn => generate_pawn_moves(board, sq),
+//         Piece::Knight => generate_knight_moves(sq),
+//         Piece::Bishop => generate_bishop_moves(board, sq),
+//         Piece::Rook => generate_rook_moves(board, sq),
+//         Piece::Queen => generate_queen_moves(board, sq),
+//         Piece::King => generate_king_moves(board, sq),
+//     }
+// }
 
 /// Generate pawn moves
 fn generate_pawn_moves(board: &Board, sq: u8) -> Vec<Move> {
@@ -240,38 +239,146 @@ fn generate_pawn_moves(board: &Board, sq: u8) -> Vec<Move> {
 }
 
 /// Get the en passant square, if available
-fn get_en_passant_square(_board: &Board) -> Option<u8> {
-    // TODO: Implement tracking of en passant square in the board state
-    None
+fn get_en_passant_square(board: &Board) -> Option<u8> {
+    board.en_passant
 }
 
 /// Generate knight moves
-fn generate_knight_moves(sq: u8) -> Vec<Move> {
+fn generate_knight_moves(board: &Board, sq: u8) -> Vec<Move> {
     let mut moves = vec![];
     let knight_offsets = [-17, -15, -10, -6, 6, 10, 15, 17];
-
+    let from_rank = (sq / 8) as i8;
+    let from_file = (sq % 8) as i8;
     for &offset in &knight_offsets {
         let target_sq = sq as i8 + offset;
-        if target_sq >= 0 && target_sq < 64 {
-            moves.push(Move {
-                from: sq,
-                to: target_sq as u8,
-                promotion: None,
-            });
+        if target_sq < 0 || target_sq >= 64 {
+            continue;
         }
+        let to_rank = (target_sq / 8) as i8;
+        let to_file = (target_sq % 8) as i8;
+        let dr = (from_rank - to_rank).abs();
+        let df = (from_file - to_file).abs();
+        // Must be a knight move (2,1) or (1,2)
+        if !((dr == 2 && df == 1) || (dr == 1 && df == 2)) {
+            continue;
+        }
+        // Can't land on own piece
+        if let Some((_, color)) = board.squares[target_sq as usize] {
+            if color == board.side_to_move {
+                continue;
+            }
+        }
+        moves.push(Move {
+            from: sq,
+            to: target_sq as u8,
+            promotion: None,
+        });
     }
+        fn generate_bishop_moves(board: &Board, sq: u8) -> Vec<Move> {
+                let mut moves = vec![];
+                let directions = [-9, -7, 7, 9];
+                for &dir in &directions {
+                    let mut current_sq = sq as i8;
+                    loop {
+                        let next_sq = current_sq + dir;
+                        if next_sq < 0 || next_sq >= 64 {
+                            break;
+                        }
+                        let from_rank = current_sq / 8;
+                        let from_file = current_sq % 8;
+                        let to_rank = next_sq / 8;
+                        let to_file = next_sq % 8;
+                        // Prevent wrapping
+                        if (from_rank - to_rank).abs() != 1 || (from_file - to_file).abs() != 1 {
+                            break;
+                        }
+                        if let Some((_, color)) = board.squares[next_sq as usize] {
+                            if color != board.side_to_move {
+                                moves.push(Move {
+                                    from: sq,
+                                    to: next_sq as u8,
+                                    promotion: None,
+                                });
+                            }
+                            break;
+                        } else {
+                            moves.push(Move {
+                                from: sq,
+                                to: next_sq as u8,
+                                promotion: None,
+                            });
+                        }
+                        current_sq = next_sq;
+                    }
+                }
+                moves
+            }
+
+            fn generate_rook_moves(board: &Board, sq: u8) -> Vec<Move> {
+                let mut moves = vec![];
+                let directions = [-8, -1, 1, 8];
+                for &dir in &directions {
+                    let mut current_sq = sq as i8;
+                    loop {
+                        let next_sq = current_sq + dir;
+                        if next_sq < 0 || next_sq >= 64 {
+                            break;
+                        }
+                        let from_rank = current_sq / 8;
+                        let from_file = current_sq % 8;
+                        let to_rank = next_sq / 8;
+                        let to_file = next_sq % 8;
+                        // Prevent wrapping
+                        if dir == -1 && to_file > from_file { break; }
+                        if dir == 1 && to_file < from_file { break; }
+                        if dir == -8 && to_rank > from_rank { break; }
+                        if dir == 8 && to_rank < from_rank { break; }
+                        if let Some((_, color)) = board.squares[next_sq as usize] {
+                            if color != board.side_to_move {
+                                moves.push(Move {
+                                    from: sq,
+                                    to: next_sq as u8,
+                                    promotion: None,
+                                });
+                            }
+                            break;
+                        } else {
+                            moves.push(Move {
+                                from: sq,
+                                to: next_sq as u8,
+                                promotion: None,
+                            });
+                        }
+                        current_sq = next_sq;
+                    }
+                }
+                moves
+            }
 
     moves
 }
 
 /// Generate queen moves
-fn generate_queen_moves(board: &Board, sq: u8) -> Vec<Move> {
-    let mut moves = vec![];
-    moves.extend(generate_rook_moves(board, sq));
-    moves.extend(generate_bishop_moves(board, sq));
-    moves
+// fn generate_queen_moves(board: &Board, sq: u8) -> Vec<Move> {
+//     let mut moves = vec![];
+//     moves.extend(generate_rook_moves(board, sq));
+//     moves.extend(generate_bishop_moves(board, sq));
+//     moves
+// }
+    pub fn generate_piece_moves(board: &Board, piece: Piece, sq: u8) -> Vec<Move> {
+    match piece {
+        Piece::Pawn => generate_pawn_moves(board, sq),
+    Piece::Knight => generate_knight_moves(board, sq),
+        Piece::Bishop => generate_bishop_moves(board, sq),
+        Piece::Rook => generate_rook_moves(board, sq),
+        Piece::Queen => {
+            let mut moves = generate_rook_moves(board, sq);
+            moves.extend(generate_bishop_moves(board, sq));
+            moves
+        },
+        Piece::King => generate_king_moves(board, sq),
+    }
 }
-
 /// Generate king moves
 fn generate_king_moves(board: &Board, sq: u8) -> Vec<Move> {
     let mut moves = vec![];
@@ -319,20 +426,14 @@ fn generate_king_moves(board: &Board, sq: u8) -> Vec<Move> {
 
 /// Check if kingside castling is possible
 fn can_castle_kingside(board: &Board) -> bool {
-    let king_sq = match board.side_to_move {
-        Color::White => 4, // e1
-        Color::Black => 60, // e8
+    let (king_sq, rook_sq, right_char) = match board.side_to_move {
+        Color::White => (4, 7, 'K'), // e1, h1
+        Color::Black => (60, 63, 'k'), // e8, h8
     };
-    let rook_sq = match board.side_to_move {
-        Color::White => 7, // h1
-        Color::Black => 63, // h8
-    };
-
-    // Ensure the king and rook have not moved
-    if !has_king_and_rook_not_moved(board, king_sq, rook_sq) {
+    // Check castling rights from FEN
+    if !board.castling_rights.contains(right_char) {
         return false;
     }
-
     // Ensure the squares between the king and rook are empty
     let between_squares = match board.side_to_move {
         Color::White => [5, 6], // f1, g1
@@ -341,7 +442,6 @@ fn can_castle_kingside(board: &Board) -> bool {
     if !are_squares_empty(board, &between_squares) {
         return false;
     }
-
     // Ensure the king does not move through or into check
     let king_path = match board.side_to_move {
         Color::White => [4, 5, 6], // e1, f1, g1
@@ -350,26 +450,19 @@ fn can_castle_kingside(board: &Board) -> bool {
     if is_any_square_attacked(board, &king_path, board.side_to_move) {
         return false;
     }
-
     true
 }
 
 /// Check if queenside castling is possible
 fn can_castle_queenside(board: &Board) -> bool {
-    let king_sq = match board.side_to_move {
-        Color::White => 4, // e1
-        Color::Black => 60, // e8
+    let (king_sq, rook_sq, right_char) = match board.side_to_move {
+        Color::White => (4, 0, 'Q'), // e1, a1
+        Color::Black => (60, 56, 'q'), // e8, a8
     };
-    let rook_sq = match board.side_to_move {
-        Color::White => 0, // a1
-        Color::Black => 56, // a8
-    };
-
-    // Ensure the king and rook have not moved
-    if !has_king_and_rook_not_moved(board, king_sq, rook_sq) {
+    // Check castling rights from FEN
+    if !board.castling_rights.contains(right_char) {
         return false;
     }
-
     // Ensure the squares between the king and rook are empty
     let between_squares = match board.side_to_move {
         Color::White => [1, 2, 3], // b1, c1, d1
@@ -378,7 +471,6 @@ fn can_castle_queenside(board: &Board) -> bool {
     if !are_squares_empty(board, &between_squares) {
         return false;
     }
-
     // Ensure the king does not move through or into check
     let king_path = match board.side_to_move {
         Color::White => [4, 3, 2], // e1, d1, c1
@@ -387,13 +479,12 @@ fn can_castle_queenside(board: &Board) -> bool {
     if is_any_square_attacked(board, &king_path, board.side_to_move) {
         return false;
     }
-
     true
 }
 
 /// Check if the king and rook have not moved
 fn has_king_and_rook_not_moved(_board: &Board, _king_sq: u8, _rook_sq: u8) -> bool {
-    // TODO: Implement tracking of king and rook movement
+    // FEN castling rights now checked in can_castle_kingside/queenside
     true
 }
 
@@ -464,36 +555,7 @@ fn is_square_attacked(board: &Board, sq: u8, color: Color) -> bool {
 /// Generate bishop moves
 fn generate_bishop_moves(board: &Board, sq: u8) -> Vec<Move> {
     let mut moves = vec![];
-    let attacks = compute_bishop_attacks(sq);
-
-    for target_sq in attacks.bits() {
-        if let Some((_, color)) = board.squares[target_sq as usize] {
-            if color != board.side_to_move {
-                moves.push(Move {
-                    from: sq,
-                    to: target_sq,
-                    promotion: None,
-                });
-            }
-        } else {
-            moves.push(Move {
-                from: sq,
-                to: target_sq,
-                promotion: None,
-            });
-        }
-    }
-
-    moves
-}
-
-/// Generate rook moves
-fn generate_rook_moves(board: &Board, sq: u8) -> Vec<Move> {
-    let mut moves = vec![];
-    let directions = [-8, -1, 1, 8];
-    let from_rank = sq / 8;
-    let from_file = sq % 8;
-
+    let directions = [-9i8, -7i8, 7i8, 9i8];
     for &dir in &directions {
         let mut current_sq = sq as i8;
         loop {
@@ -501,27 +563,55 @@ fn generate_rook_moves(board: &Board, sq: u8) -> Vec<Move> {
             if next_sq < 0 || next_sq >= 64 {
                 break;
             }
-            let to_rank = (next_sq / 8) as u8;
-            let to_file = (next_sq % 8) as u8;
-            // Prevent wrapping around the board
-            if dir == -1 && to_file > from_file { break; }
-            if dir == 1 && to_file < from_file { break; }
-
+            let from_rank = (current_sq / 8) as i8;
+            let from_file = (current_sq % 8) as i8;
+            let to_rank = (next_sq / 8) as i8;
+            let to_file = (next_sq % 8) as i8;
+            // Prevent wrapping: diagonal steps must change both rank and file by 1
+            if (from_rank - to_rank).abs() != 1 || (from_file - to_file).abs() != 1 {
+                break;
+            }
             if let Some((_, color)) = board.squares[next_sq as usize] {
                 if color != board.side_to_move {
-                    moves.push(Move {
-                        from: sq,
-                        to: next_sq as u8,
-                        promotion: None,
-                    });
+                    moves.push(Move { from: sq, to: next_sq as u8, promotion: None });
                 }
-                break; // Blocked by any piece
+                break; // blocked
             } else {
-                moves.push(Move {
-                    from: sq,
-                    to: next_sq as u8,
-                    promotion: None,
-                });
+                moves.push(Move { from: sq, to: next_sq as u8, promotion: None });
+            }
+            current_sq = next_sq;
+        }
+    }
+    moves
+}
+
+/// Generate rook moves
+fn generate_rook_moves(board: &Board, sq: u8) -> Vec<Move> {
+    let mut moves = vec![];
+    let directions = [-8i8, -1i8, 1i8, 8i8];
+    for &dir in &directions {
+        let mut current_sq = sq as i8;
+        loop {
+            let next_sq = current_sq + dir;
+            if next_sq < 0 || next_sq >= 64 {
+                break;
+            }
+            let from_rank = (current_sq / 8) as i8;
+            let from_file = (current_sq % 8) as i8;
+            let to_rank = (next_sq / 8) as i8;
+            let to_file = (next_sq % 8) as i8;
+            // Prevent wrapping for horizontal moves
+            if dir == -1 && to_file > from_file { break; }
+            if dir == 1 && to_file < from_file { break; }
+            if dir == -8 && to_rank > from_rank { break; }
+            if dir == 8 && to_rank < from_rank { break; }
+            if let Some((_, color)) = board.squares[next_sq as usize] {
+                if color != board.side_to_move {
+                    moves.push(Move { from: sq, to: next_sq as u8, promotion: None });
+                }
+                break; // blocked
+            } else {
+                moves.push(Move { from: sq, to: next_sq as u8, promotion: None });
             }
             current_sq = next_sq;
         }
