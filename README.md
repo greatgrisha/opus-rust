@@ -39,14 +39,14 @@ print("Parallel moves for pieces:", parallel_moves)
 _see the, sample.py and the batch_generation.py also, pref-full.py, this would contain every function there is, and it would be just, simple yet efficient representation of the api._
 ## Performance Benchmark
 
-[perfomance benchmark, just use, the algorithim, that play the random move at the increasing or specific depth, to test the, perfomance, of this program.]
+[_Perfomance benchmark, just use, the algorithim, that play the random move at the increasing or specific depth, to test the, perfomance, of this program._]
 Run the provided benchmark script:
-```bash
+```python
 python pref_full.py
 ```
 Example RUN:
 ```
-** light mode, -> prefered for, just, smoke test
+__Light mode__, -> prefered for, just, smoke test
 (f) @greatgrisha ➜ /workspaces/kaali/move-generation (master) $ python perf_full.py --mode light --workers 2 --depth 6
 Perf test starting: mode=light, workers=2, positions=100, depth=6, seed=42, parallel=process
 Worker 1 done: positions=100 moves=2586 avg_pos_time=0.000008s
@@ -66,64 +66,86 @@ P95 time per position: 0.015211 ms
 Moves/sec (measured): 3116395
 Memory delta (main process): 0.12 MB
 ---------------------------
-
-(f) @greatgrisha ➜ /workspaces/kaali/move-generation (master) $
-
-** medium test, - medium mode would be suitable for training, ex. training the neural network on the game would require, atleast millions of games, medium mode can test this optimally on the standard hardware
-
-(f) @greatgrisha ➜ /workspaces/opus-rust/move-generation (master) $ python perf_full.py  --mode medium --workers 8 --positions 50 --depth 6
-Perf test starting: mode=medium, workers=8, positions=50, depth=6, seed=42, parallel=process
-Worker 0 done: positions=50 moves=1319 avg_pos_time=0.000016s
-Worker 7 done: positions=50 moves=1361 avg_pos_time=0.000016s
-Worker 1 done: positions=50 moves=1256 avg_pos_time=0.000014s
-Worker 3 done: positions=50 moves=1279 avg_pos_time=0.000015s
-Worker 6 done: positions=50 moves=1263 avg_pos_time=0.000015s
-Worker 5 done: positions=50 moves=1293 avg_pos_time=0.000016s
-Worker 2 done: positions=50 moves=1328 avg_pos_time=0.000016s
-Worker 4 done: positions=50 moves=1314 avg_pos_time=0.000015s
+__Medium Test_ -> , Medium mode would be suitable for training,  ex. training the neural network on the game would require
+atleast millions of games, can be perform on the standard hardware
+f) (maturin_env) /content/opus-rust/move-generation# python pref-full.py --mode medium --worker 48 --positions 2000 --depth 20
+Perf test starting: mode=medium, workers=48, positions=2000, depth=20, seed=42, parallel=process
+Worker 22 done: positions=2000 moves=65302 avg_pos_time=0.000045s
+Worker 24 done: positions=2000 moves=65149 avg_pos_time=0.000045s
+Worker 20 done: positions=2000 moves=65761 avg_pos_time=0.000046s
+Worker 14 done: positions=2000 moves=65250 avg_pos_time=0.000046s
+Worker 16 done: positions=2000 moves=65199 avg_pos_time=0.000048s
+Worker 34 done: positions=2000 moves=65139 avg_pos_time=0.000051s
+Worker 40 done: positions=2000 moves=64848 avg_pos_time=0.000053s
+Worker 10 done: positions=2000 moves=65595 avg_pos_time=0.000055s
+Worker 25 done: positions=2000 moves=65256 avg_pos_time=0.000060s
+Worker 26 done: positions=2000 moves=65248 avg_pos_time=0.000060s
+Worker 5 done: positions=2000 moves=65100 avg_pos_time=0.000061s
+Worker 6 done: positions=2000 moves=65026 avg_pos_time=0.000060s
+Worker 12 done: positions=2000 moves=65152 avg_pos_time=0.000059s
+Worker 9 done: positions=2000 moves=65558 avg_pos_time=0.000063s
+Worker 18 done: positions=2000 moves=65212 avg_pos_time=0.000063s
+Worker 43 done: positions=2000 moves=64999 avg_pos_time=0.000065s
+Worker 39 done: positions=2000 moves=65094 avg_pos_time=0.000064s
+Worker 42 done: positions=2000 moves=65235 avg_pos_time=0.000065s
+Worker 17 done: positions=2000 moves=65475 avg_pos_time=0.000076s
+Worker 36 done: positions=2000 moves=65599 avg_pos_time=0.000066s
+Worker 35 done: positions=2000 moves=65174 avg_pos_time=0.000068s
+Worker 44 done: positions=2000 moves=64883 avg_pos_time=0.000069s
+Worker 19 done: positions=2000 moves=65111 avg_pos_time=0.000070s
+Worker 31 done: positions=2000 moves=65383 avg_pos_time=0.000072s
+Worker 2 done: positions=2000 moves=64866 avg_pos_time=0.000074s
+Worker 21 done: positions=2000 moves=65058 avg_pos_time=0.000073s
+Worker 45 done: positions=2000 moves=65090 avg_pos_time=0.000076s
+Worker 0 done: positions=2000 moves=65315 avg_pos_time=0.000076s
+Worker 46 done: positions=2000 moves=64901 avg_pos_time=0.000077s
+Worker 27 done: positions=2000 moves=64989 avg_pos_time=0.000078s
+Worker 30 done: positions=2000 moves=65051 avg_pos_time=0.000078s
+Worker 33 done: positions=2000 moves=64929 avg_pos_time=0.000078s
+Worker 7 done: positions=2000 moves=65170 avg_pos_time=0.000079s
+Worker 32 done: positions=2000 moves=65253 avg_pos_time=0.000079s
+Worker 4 done: positions=2000 moves=65113 avg_pos_time=0.000079s
+Worker 15 done: positions=2000 moves=65398 avg_pos_time=0.000080s
+Worker 13 done: positions=2000 moves=65417 avg_pos_time=0.000079s
+Worker 28 done: positions=2000 moves=64716 avg_pos_time=0.000079s
+Worker 41 done: positions=2000 moves=65466 avg_pos_time=0.000081s
+Worker 11 done: positions=2000 moves=65032 avg_pos_time=0.000080s
+Worker 3 done: positions=2000 moves=65792 avg_pos_time=0.000080s
+Worker 1 done: positions=2000 moves=64790 avg_pos_time=0.000080s
+Worker 23 done: positions=2000 moves=65344 avg_pos_time=0.000080s
+Worker 29 done: positions=2000 moves=65330 avg_pos_time=0.000081s
+Worker 47 done: positions=2000 moves=65641 avg_pos_time=0.000081s
+Worker 38 done: positions=2000 moves=65169 avg_pos_time=0.000081s
+Worker 37 done: positions=2000 moves=64980 avg_pos_time=0.000083s
+Worker 8 done: positions=2000 moves=64559 avg_pos_time=0.000082s
 
 --- Performance Summary ---
 Mode: medium
-Workers: 8
-Total positions: 400
-Total moves generated: 10.41k
-Avg moves per position: 26.03
-Total wall time: 0.08s
-Measured total time (workers span): 0.07s
-Mean time per position: 0.015447 ms
-Median time per position: 0.011206 ms
-P95 time per position: 0.031126 ms
-Moves/sec (measured): 1685328
-Memory delta (main process): 0.25 MB
+Workers: 48
+Total positions: 96000
+Total moves generated: 3.13M
+Avg moves per position: 32.59
+Total wall time: 7.70s
+Measured total time (workers span): 7.56s
+Mean time per position: 0.069229 ms
+Median time per position: 0.061035 ms
+P95 time per position: 0.108242 ms
+Moves/sec (measured): 470832
+Memory delta (main process): 5.94 MB
 ---------------------------
 
-(f) @greatgrisha ➜ /workspaces/opus-rust/move-generation (master) $
+(maturin_env) /content/opus-rust/move-generation# 
 
-**heavy test** test atleast the billion or trillion of game generation and speed require to truly form the neural network and here it can surpass other generation engine[ this isn't engine but validator and move generation for the training of model and for the integration to the specific other engine]
-(f) @greatgrisha ➜ /workspaces/kaali/move-generation (master) $ echo ""machine is just same, so the perfomance would be same""
-machine is just same, so the perfomance would be same
-(f) @greatgrisha ➜ /workspaces/kaali/move-generation (master) $ lscpu
-Architecture:             x86_64
-  CPU op-mode(s):         32-bit, 64-bit
-  Address sizes:          48 bits physical, 48 bits virtual
-  Byte Order:             Little Endian
-CPU(s):                   4
-  On-line CPU(s) list:    0-3
-Vendor ID:                AuthenticAMD
-  Model name:             AMD EPYC 7763 64-Core Processor
-    CPU family:           25
-    Model:                1
-    Thread(s) per core:   2
-    Core(s) per socket:   2
-    Socket(s):            1
-    Stepping:             1
-.......
+__Heavy Test_ -> This would be, full, training grade, test on perfomance, would be perform. expect that if the medium test used 2000 position then expect the 10000 position if 20 depth at medium test here it can be 200. indeed, 100x increase in all the generation.
+
+The Machine and Hardware, this would be *yet* test on have, 98 vCPU, 2.00GHz each vCPU.
+
 
 ```
 
 ## Comparison to Other Libraries
 - **python-chess:** This Rust engine is significantly faster for bulk move generation, especially when using parallelism. python-chess is pure Python and not parallelized.
-- **Stockfish:** Stockfish is a full chess engine; this library is focused on move generation only, with a much simpler API and easier integration for custom tools.
+- **Stockfish:** Stockfish is a full chess engine; this library is focused on move generation only, with a much simpler API and easier integration for custom program.
 - **Other Rust libraries:** This project is optimized for Python FFI and parallel workloads, making it ideal for AI/ science pipelines.
 
 ## API Reference
@@ -134,7 +156,7 @@ Vendor ID:                AuthenticAMD
 ## Development
 - Rust code in `src/`
 - Python bindings via PyO3
-- Benchmarks in `perf_test.py`
+- Benchmarks in `pref_full.py`
 
 ## License
 MIT
