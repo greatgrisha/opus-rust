@@ -20,10 +20,7 @@ This project provides an extremely fast chess move generation and rules engine w
    cd move-generation
    maturin develop --release
    ```
-2. **Install Python dependencies for benchmarking:**
-   ```bash
-   pip install psutil
-   ```
+
 
 ## Usage Example
 ```python
@@ -39,7 +36,7 @@ piece_sq_list = [("rook", 0), ("knight", 1), ("bishop", 2), ("queen", 3)]
 parallel_moves = board.generate_moves_for_pieces_parallel(piece_sq_list)
 print("Parallel moves for pieces:", parallel_moves)
 ```
-
+_see the, sample.py and the batch_generation.py also, pref-full.py, this would contain every function there is, and it would be just, simple yet efficient representation of the api._
 ## Performance Benchmark
 
 [perfomance benchmark, just use, the algorithim, that play the random move at the increasing or specific depth, to test the, perfomance, of this program.]
