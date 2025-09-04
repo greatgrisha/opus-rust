@@ -136,9 +136,77 @@ Memory delta (main process): 5.94 MB
 
 (maturin_env) /content/opus-rust/move-generation# 
 
-__Heavy Test_ -> This would be, full, training grade, test on perfomance, would be perform. expect that if the medium test used 2000 position then expect the 10000 position if 20 depth at medium test here it can be 200. indeed, 100x increase in all the generation.
+__Heavy Test_ -> This would be, full, training grade, test on perfomance, would be perform. expect that if the medium test used 2000 position then expect the 10000 position. indeed, 100x increase in all the generation.
 
-The Machine and Hardware, this would be *yet* test on have, 98 vCPU, 2.00GHz each vCPU.
+(maturin_env) /content/opus-rust/move-generation# python pref-full.py --mode heavy
+Perf test starting: mode=heavy, workers=48, positions=100000, depth=40, seed=42, parallel=process
+
+
+
+Worker 13 done: positions=100000 moves=3562655 avg_pos_time=0.000057s
+Worker 39 done: positions=100000 moves=3561882 avg_pos_time=0.000058s
+Worker 19 done: positions=100000 moves=3556644 avg_pos_time=0.000057s
+Worker 8 done: positions=100000 moves=3561427 avg_pos_time=0.000057s
+Worker 20 done: positions=100000 moves=3557918 avg_pos_time=0.000057s
+Worker 42 done: positions=100000 moves=3558467 avg_pos_time=0.000057s
+Worker 3 done: positions=100000 moves=3555355 avg_pos_time=0.000057s
+Worker 25 done: positions=100000 moves=3560976 avg_pos_time=0.000057s
+Worker 2 done: positions=100000 moves=3558883 avg_pos_time=0.000058s
+Worker 0 done: positions=100000 moves=3559577 avg_pos_time=0.000057s
+Worker 43 done: positions=100000 moves=3559259 avg_pos_time=0.000058s
+Worker 29 done: positions=100000 moves=3560019 avg_pos_time=0.000057s
+Worker 4 done: positions=100000 moves=3560494 avg_pos_time=0.000058s
+Worker 32 done: positions=100000 moves=3559071 avg_pos_time=0.000057s
+Worker 5 done: positions=100000 moves=3557824 avg_pos_time=0.000058s
+Worker 9 done: positions=100000 moves=3558135 avg_pos_time=0.000058s
+Worker 33 done: positions=100000 moves=3561889 avg_pos_time=0.000058s
+Worker 1 done: positions=100000 moves=3560623 avg_pos_time=0.000058s
+Worker 14 done: positions=100000 moves=3563053 avg_pos_time=0.000057s
+Worker 37 done: positions=100000 moves=3556952 avg_pos_time=0.000057s
+Worker 34 done: positions=100000 moves=3559905 avg_pos_time=0.000058s
+Worker 40 done: positions=100000 moves=3561493 avg_pos_time=0.000057s
+Worker 15 done: positions=100000 moves=3560082 avg_pos_time=0.000058s
+Worker 11 done: positions=100000 moves=3560688 avg_pos_time=0.000058s
+Worker 21 done: positions=100000 moves=3560013 avg_pos_time=0.000061s
+Worker 26 done: positions=100000 moves=3560983 avg_pos_time=0.000061s
+Worker 27 done: positions=100000 moves=3557881 avg_pos_time=0.000062s
+Worker 22 done: positions=100000 moves=3560174 avg_pos_time=0.000062s
+Worker 44 done: positions=100000 moves=3558028 avg_pos_time=0.000062s
+Worker 35 done: positions=100000 moves=3560044 avg_pos_time=0.000062s
+Worker 28 done: positions=100000 moves=3558992 avg_pos_time=0.000062s
+Worker 45 done: positions=100000 moves=3560652 avg_pos_time=0.000061s
+Worker 30 done: positions=100000 moves=3562268 avg_pos_time=0.000062s
+Worker 10 done: positions=100000 moves=3557509 avg_pos_time=0.000062s
+Worker 12 done: positions=100000 moves=3559452 avg_pos_time=0.000062s
+Worker 6 done: positions=100000 moves=3563697 avg_pos_time=0.000062s
+Worker 31 done: positions=100000 moves=3560770 avg_pos_time=0.000062s
+Worker 16 done: positions=100000 moves=3558783 avg_pos_time=0.000061s
+Worker 7 done: positions=100000 moves=3561783 avg_pos_time=0.000062s
+Worker 36 done: positions=100000 moves=3561608 avg_pos_time=0.000062s
+Worker 38 done: positions=100000 moves=3561446 avg_pos_time=0.000061s
+Worker 24 done: positions=100000 moves=3559228 avg_pos_time=0.000062s
+Worker 47 done: positions=100000 moves=3558363 avg_pos_time=0.000062s
+Worker 23 done: positions=100000 moves=3555187 avg_pos_time=0.000062s
+Worker 18 done: positions=100000 moves=3560851 avg_pos_time=0.000062s
+Worker 46 done: positions=100000 moves=3556162 avg_pos_time=0.000062s
+Worker 17 done: positions=100000 moves=3561021 avg_pos_time=0.000063s
+Worker 41 done: positions=100000 moves=3561557 avg_pos_time=0.000070s
+
+--- Performance Summary ---
+Mode: heavy
+Workers: 48
+Total positions: 4800000
+Total moves generated: 170.87M
+Avg moves per position: 35.60
+Total wall time: 515.09s
+Measured total time (workers span): 510.92s
+Mean time per position: 0.059756 ms
+Median time per position: 0.057697 ms
+P95 time per position: 0.077724 ms
+Moves/sec (measured): 595720
+Memory delta (main process): 208.19 MB
+---------------------------
+
 
 
 ```
